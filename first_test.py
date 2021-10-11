@@ -4,15 +4,25 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
 
+def events(lcReader):
+    while True:
+        evt = lcReader.readNextEvent()
+        if not evt:
+            break
+        else:
+            yield evt
+
+
 lcReader = ROOT.IOIMPL.LCFactory.getInstance().createLCReader()
 lcReader.setReadCollectionNames(
     ["PandoraPFOs", "Durham_2JetsPFOs", "MCParticlesSkimmed", "RecoMCTruthLink"])
-lcReader.open("ZHDecayMode.slcio")
+lcReader.open("../ZHDecayMode.slcio")
 
 all_rec_labels = np.empty(0, dtype=np.int32)
 all_true_labels = np.empty(0, dtype=np.int32)
 
-while evt := lcReader.readNextEvent():
+# while evt := lcReader.readNextEvent():
+for evt in events(lcReader):
     particles = evt.getCollection("Durham_2JetsPFOs")
     mctruth = evt.getCollection("RecoMCTruthLink")
     nav = ROOT.UTIL.LCRelationNavigator(mctruth)
@@ -39,5 +49,6 @@ labels = [22, 11, -11, 13, -13, 211, -211, 2112]
 
 lcReader.close()
 ConfusionMatrixDisplay.from_predictions(
-    all_true_labels, all_rec_labels, normalize="true", values_format=".1f", labels=labels)
+    all_true_labels, all_rec_labels,
+    normalize="true", values_format=".1f", labels=labels)
 plt.show()
