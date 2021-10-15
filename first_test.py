@@ -32,18 +32,27 @@ for evt in events(lcReader):
     for particle in particles:
         rec = particle.getType()
         if rec not in accepted_particles:
-            continue
+            rec = 0
         mcparticles = nav.getRelatedToObjects(particle)
         mcweights = nav.getRelatedToWeights(particle)
-        stable = [x.getGeneratorStatus == 1 for x in mcparticles]
+        stable = [x.getGeneratorStatus() == 1 for x in mcparticles]
         # filter mcparticles to a more sensible subset
-        for i, mcp  in enumerate(mcparticles):
-            pdg = mcp.getPDG()
-            if not stable[i] or pdg not in accepted_particles:
-                mcparticles.remove(i)
-                mcweights.remove(i)
-        
-                
+        stable_mcparticles = []
+        stable_mcweights = []
+        for i, p in enumerate(mcparticles):
+            if stable[i]:
+                stable_mcparticles.append(p)
+                stable_mcweights.append(mcweights[i])
+        if len(stable_mcparticles) == 0:
+            continue
+        mcPDGs = [x.getPDG() for x in stable_mcparticles]
+        mc_eweights = [int(x) / 10000 for x in stable_mcweights]
+        mc_tweights = [int(x) % 10000 for x in stable_mcweights]
+        true = mcPDGs[mc_eweights.index(max(mc_eweights))]
+        if true not in accepted_particles:
+            true = 0
+        all_rec_labels.append(rec)
+        all_true_labels.append(true)
 
 # cutoff = 5000
 # rec_mask = all_rec_labels < cutoff
@@ -52,7 +61,9 @@ for evt in events(lcReader):
 # all_rec_labels = all_rec_labels[mask]
 # all_true_labels = all_true_labels[mask]
 
+labels = accepted_particles + [0]
 
 lcReader.close()
-ConfusionMatrixDisplay.from_predictions(all_true_labels, all_rec_labels, normalize="true", values_format=".1f")
+ConfusionMatrixDisplay.from_predictions(
+    all_true_labels, all_rec_labels, normalize="true", values_format=".1f", labels=labels)
 plt.show()

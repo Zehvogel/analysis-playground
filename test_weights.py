@@ -12,8 +12,6 @@ def events(lcReader):
 
 
 lcReader = ROOT.IOIMPL.LCFactory.getInstance().createLCReader()
-# does not want to work now :(
-# lcReader.setReadCollectionNames(["PandoraPFOs", "Durham_2JetsPFOs", "MCParticlesSkimmed", "RecoMCTruthLink"])
 lcReader.open("../ZHDecayMode.slcio")
 
 for evt in events(lcReader):
@@ -28,6 +26,7 @@ for evt in events(lcReader):
             continue
         eweights = [int(x) / 10000 for x in nav.getRelatedToWeights(particle)]
         tweights = [int(x) % 10000 for x in nav.getRelatedToWeights(particle)]
-        print("rec: {0}, mc: {1}, eweights: {2}, tweights: {3}".format(rec, true, eweights, tweights))
-        
+        print("rec: {0}, mc: {1}, eweights: {2}, tweights: {3}".format(
+            rec, true, eweights, tweights))
+
 lcReader.close()
