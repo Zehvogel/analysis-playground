@@ -19,9 +19,9 @@ lcReader.setReadCollectionNames(
 lcReader.open("../ZHDecayMode.slcio")
 
 accepted_particles = [22, 11, -11, 13, -13, 211, -211]
+labels = accepted_particles + [0]
 
-all_rec_labels = []
-all_true_labels = []
+matrix = np.zeros((len(labels), len(labels)), dtype=np.float64)
 
 # while evt := lcReader.readNextEvent():
 for evt in events(lcReader):
@@ -29,6 +29,8 @@ for evt in events(lcReader):
     mctruth = evt.getCollection("RecoMCTruthLink")
     nav = ROOT.UTIL.LCRelationNavigator(mctruth)
 
+    rec_labels = []
+    true_labels = []
     for particle in particles:
         rec = particle.getType()
         if rec not in accepted_particles:
@@ -51,19 +53,12 @@ for evt in events(lcReader):
         true = mcPDGs[mc_eweights.index(max(mc_eweights))]
         if true not in accepted_particles:
             true = 0
-        all_rec_labels.append(rec)
-        all_true_labels.append(true)
-
-# cutoff = 5000
-# rec_mask = all_rec_labels < cutoff
-# true_mask = all_true_labels < cutoff
-# mask = rec_mask & true_mask
-# all_rec_labels = all_rec_labels[mask]
-# all_true_labels = all_true_labels[mask]
-
-labels = accepted_particles + [0]
+        rec_labels.append(rec)
+        true_labels.append(true)
+    matrix += confusion_matrix(true_labels, rec_labels, labels=labels)
 
 lcReader.close()
-ConfusionMatrixDisplay.from_predictions(
-    all_true_labels, all_rec_labels, normalize="true", values_format=".1f", labels=labels)
-plt.show()
+print(matrix)
+# ConfusionMatrixDisplay.from_predictions(
+#     all_true_labels, all_rec_labels, normalize="true", values_format=".1f", labels=labels)
+# plt.show()
