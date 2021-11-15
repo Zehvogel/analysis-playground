@@ -1,8 +1,9 @@
 #include <TH2F.h>
 #include <TFile.h>
 #include <TCanvas.h>
+#include <TStyle.h>
 
-void mupi(const TString ifname = "300k")
+void mupi(const TString ifname = "1000k", std::vector<enum EColorPalette> styles = {kViridis, kAvocado, kDarkBodyRadiator, kInvertedDarkBodyRadiator})
 {
     std::unique_ptr<TFile> f(TFile::Open("sld_out_" + ifname + ".root"));
     
@@ -60,5 +61,33 @@ void mupi(const TString ifname = "300k")
     mup_diff->Draw("COLZ");
     mup_diff->GetYaxis()->SetTitleOffset(0.7);
     
+    // create 1
+    auto one = (TH2F*) mumupt->Clone();
+    for (int i = 0; i < one->GetNcells(); i++) {
+        one->SetBinContent(i, 1.0);
+    }
+
+    c1->cd(7)->SetLogy();
+    auto mupt_ieff = (TH2F *) one->Clone();
+    *mupt_ieff = *mupt_ieff - *mupt_eff;
+    mupt_ieff->SetStats(0);
+    mupt_ieff->SetTitle("#mu^{#pm} 1 - eff; cos(#theta); Momentum (GeV)   ");
+    mupt_ieff->Draw("COLZ");
+    mupt_ieff->GetYaxis()->SetTitleOffset(0.7);
+    
+    c1->cd(8)->SetLogy();
+    auto mup_ieff = (TH2F *) one->Clone();
+    *mup_ieff = *mup_ieff - *mup_eff;
+    mup_ieff->SetStats(0);
+    mup_ieff->SetTitle("#mu^{#pm} 1 - eff; cos(#theta); Momentum (GeV)   ");
+    mup_ieff->Draw("COLZ");
+    mup_ieff->GetYaxis()->SetTitleOffset(0.7);
+    
     c1->SaveAs("mupi" + ifname + ".pdf");
+    
+    for (auto e: styles) {
+        gStyle->SetPalette(e);
+        
+        c1->SaveAs("mupi" + ifname + std::to_string(e) + ".pdf");
+    }
 }
