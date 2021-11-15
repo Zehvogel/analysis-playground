@@ -18,7 +18,7 @@ void mupi(const TString ifname = "300k")
     //std::unique_ptr<TH2F> mup_all(f->Get<TH2F>("mup_all"));
     
     auto c1 = new TCanvas("mupi");
-    c1->Divide(2,3);
+    c1->Divide(2,4);
 
     c1->cd(1)->SetLogy();
     mupipt->SetStats(0);
