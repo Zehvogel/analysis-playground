@@ -232,11 +232,18 @@ void plot_SLDs(const char *fileName = "/afs/desy.de/group/flc/pool/reichenl/myMa
     mup_eff->Draw("COLZ");
     mup_eff->GetYaxis()->SetTitleOffset(0.7);
 
-    c2->SaveAs(outname + "_emu.pdf");
-
     auto outfile = TFile(outname + ".root", "RECREATE");
 
     h->Write();
+
+    ept_all->SetName("ept_all");
+    ept_eff->SetName("ept_eff");
+    ep_all->SetName("ep_all");
+    ep_eff->SetName("ep_eff");
+    mupt_all->SetName("mupt_all");
+    mupt_eff->SetName("mupt_eff");
+    mup_all->SetName("mup_all");
+    mup_eff->SetName("mup_eff");
 
     eept->Write();
     epipt->Write();
@@ -263,4 +270,6 @@ void plot_SLDs(const char *fileName = "/afs/desy.de/group/flc/pool/reichenl/myMa
     mup_eff->Write();
 
     outfile.Close();
+    
+    c2->SaveAs(outname + "_emu.pdf");
 }
